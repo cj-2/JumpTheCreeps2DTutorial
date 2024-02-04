@@ -7,15 +7,15 @@ public partial class Main : Node
 
     private int _score;
 
-    public override void _Ready()
-    {
-        //NewGame();
-    }
-
     public void GameOver()
     {
         GetNode<Timer>("MobTimer").Stop();
         GetNode<Timer>("ScoreTimer").Stop();
+        GetNode<Hud>("Hud").ShowGameOver();
+        // Limpando os mobs
+        GetTree().CallGroup("mobs", Node.MethodName.QueueFree);
+        GetNode<AudioStreamPlayer>("Music").Stop();
+        GetNode<AudioStreamPlayer>("DeathSound").Play();
     }
 
     public void NewGame()
@@ -25,11 +25,17 @@ public partial class Main : Node
         var startPosition = GetNode<Marker2D>("StartPosition");
         player.Start(startPosition.Position);
         GetNode<Timer>("StartTimer").Start();
+
+        var hud = GetNode<Hud>("Hud");
+        hud.UpdateScore(_score);
+        hud.ShowMessage("Get Ready...");
+        GetNode<AudioStreamPlayer>("Music").Play();
     }
 
     public void OnScoreTimerTimeout()
     {
         _score++;
+        GetNode<Hud>("Hud").UpdateScore(_score);
     }
 
     public void OnStartTimerTimeout()
